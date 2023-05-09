@@ -15,9 +15,7 @@ object LinearApproximation : Approximation() {
         }
 
         val (a, b) = getKramer2x2(sx, sxx, sy, sxy, x.size)
-        val minimumCondition = minimumCondition(sx, sxx, sy, sxy, a, b, x.size)
         val f = { x: Double -> a * x + b}
-        //val func = if(minimumCondition) {x: Double -> a * x + b} else null
         val coefficients = arrayListOf(a, b)
         val meanSquareDeviation = meanSquareDeviation(f, x, y)
         val phyX = getPhiX(f, x)
@@ -26,10 +24,6 @@ object LinearApproximation : Approximation() {
 
         return Data(f, coefficients, meanSquareDeviation, x, y, phyX, e,"Линейная аппроксимация", pearsonCoefficient)
 
-    }
-
-    private fun minimumCondition(sx: Double, sxx: Double, sy: Double, sxy: Double, a: Double, b: Double, n: Int): Boolean{
-        return a * sxx + b * sx == sxy && a * sx + b * n == sy
     }
 
     private fun pearsonCoefficient(x: ArrayList<Double>, y: ArrayList<Double>, sx: Double, sy: Double, n: Int): Double{

@@ -1,16 +1,18 @@
 package approximation
 
 import Data
-import kotlin.math.pow
+import kotlin.math.exp
+import kotlin.math.ln
 
 object ExpApproximation: Approximation() {
     override fun solve(xAndY: Pair<ArrayList<Double>, ArrayList<Double>>): Data {
         val (x, y) = xAndY
-        val linearApproximation = LinearApproximation.solve(xAndY )
+        val expY = ArrayList(y.map{ln(it)})
+        val linearApproximation = LinearApproximation.solve(x to expY)
         val (A, B) = linearApproximation.coefficients
-        val a =  Math.E.pow(A)
-        val b = B
-        val f = { x: Double -> a * Math.E.pow(b * x) }
+        val a = exp(B)
+        val b = A
+        val f = {x: Double -> a * exp(b * x)}
         val coefficients = arrayListOf(a, b)
         val meanSquareDeviation = meanSquareDeviation(f, x, y)
         val phyX = getPhiX(f, x)

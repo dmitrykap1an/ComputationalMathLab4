@@ -1,6 +1,11 @@
 import approximation.*
+import jetbrains.datalore.plot.base.data.DataFrameUtil
+import org.jetbrains.letsPlot.GGBunch
 import org.jetbrains.letsPlot.geom.geomArea
+import org.jetbrains.letsPlot.geom.geomPoint
+import org.jetbrains.letsPlot.geom.geomSmooth
 import org.jetbrains.letsPlot.letsPlot
+import org.jetbrains.letsPlot.stat.statSmooth
 import java.io.*
 import java.time.LocalDateTime
 
@@ -20,17 +25,23 @@ object CLI {
         val powerApproximation = PowerApproximation.solve(data)
         val expApproximation = ExpApproximation.solve(data)
         val logApproximation = LogApproximation.solve(data)
+        val cubeApproximation = CubeApproximation.solve(data)
         val arr = arrayListOf(
             quadraticApproximation,
             linearApproximation,
             powerApproximation,
             expApproximation,
-            logApproximation
+            logApproximation,
+           cubeApproximation
         )
         askOutputOption()
         val bestApproximation = arr.minBy { it.meanSquareDeviation }
-        printResult(powerApproximation)
-        //printResult(bestApproximation)
+        arr.forEach{
+            println(it.nameOfApproximation)
+            println("Среднеквадратичное отклонение: ${it.meanSquareDeviation}")
+            println("--------------------")
+        }
+       printResult(bestApproximation)
 
     }
 
@@ -72,8 +83,8 @@ object CLI {
         bw.write("----------------------------------------------------")
         bw.newLine()
         bw.flush()
-        //bw.close()
-        //showPlot(data)
+        showPlot(data)
+        bw.close()
     }
 
     private fun getTable(numberOfDots: Int, char: Char): ArrayList<Double> {
@@ -89,9 +100,9 @@ object CLI {
                 }
             }
 
+
+
     }
-
-
 
 
     private fun askInputOption() {
@@ -125,12 +136,16 @@ object CLI {
     }
 
     private fun showPlot(data: Data){
-        val (listX, listY)  = generateSequence(data.f, data.x.first() - 3, data.x.last() + 3)
+        val listY = data.phyX
         val d = mapOf(
-            data.x + listX to data.y + listY
+            data.x to data.y, data.x to listY,
         )
 
-        val plot = letsPlot(d) + geomArea(fill = "white"){x = listX; y = listY}
+        val plot = letsPlot(d) + geomArea(fill = "white", color = "red"){ x = data.x; y = listY} +
+                geomPoint(size = 3, fill = "white"){x = data.x; y = data.y}
+        println(data.x)
+        println(listY)
+        println(data.y)
         plot.show()
     }
 
@@ -152,7 +167,7 @@ object CLI {
         if (visible) print(text)
     }
 
-    fun createFileAndWriteResult(): BufferedWriter {
+    private fun createFileAndWriteResult(): BufferedWriter {
         val date = LocalDateTime.now()
         val file = File(
             "/home/newton/IdeaProjects/Math/comp_math/lab4/src/files/results/" +
